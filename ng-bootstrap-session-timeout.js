@@ -139,10 +139,7 @@
         $http({
           method: opt.ajaxType,
           url: opt.keepAliveUrl,
-          data: opt.ajaxData,
-          headers: {
-            withCredentials: true
-          }
+          data: opt.ajaxData
         });
         keepAlivePinged = true;
 
@@ -238,16 +235,6 @@
       } else {
         countdownEl.text(secondsLeft + "s");
       }
-
-      // if(opt.countdownMessage) {
-      //   countdown.msg = opt.countdownMessage.replace('{timer}', countdown.timeLeft);
-      // }
-
-      // Set countdown message time value
-      // if (opt.countdownBar) {
-
-      //   $('.countdown-bar').css('width', countdown.percentLeft + '%');
-      // }
 
       // Countdown by one second
       countdown.timeLeft = countdown.timeLeft - 1;
