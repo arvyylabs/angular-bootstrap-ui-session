@@ -14,7 +14,7 @@
     //
     var directive = {
       bindToController: true,
-      controller: BootstrapUiSessionController,
+      controller: BootstrapSessionTimeoutController,
       controllerAs: 'bus',
       link: link,
       restrict: 'E',
