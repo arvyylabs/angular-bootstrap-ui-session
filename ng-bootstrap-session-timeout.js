@@ -210,7 +210,8 @@
 
       if (type === 'dialog' && reset) {
         // If triggered by startDialogTimer start warning countdown
-        countdown.timeLeft = Math.floor((opt.redirAfter - opt.warnAfter) / 1000);
+        var timeLeft = Math.floor((opt.redirAfter - opt.warnAfter) / 1000);
+        countdown.timeLeft = timeLeft < 0 ? 0 : timeLeft;
       } else if (type === 'session' && reset) {
         // If triggered by startSessionTimer start full countdown
         // (this is needed if user doesn't close the warning dialog)
