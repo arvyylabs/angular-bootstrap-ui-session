@@ -67,9 +67,9 @@
 
     function openModal() {
 
-      var modalInstance = $uibModal.open({
+      modalInstance = $uibModal.open({
         animation: true,
-        template: '<div class="modal-content"><div class="modal-header"><h4>{{busm.options.title}}</h4></div><div class="modal-body"><p>{{busm.options.message}}</p><p ng-if="busm.options.countdownMessage"> {{busm.buildCountdownMessage(busm.countdown.timeLeft)}}</p><uib-progressbar ng-if="busm.options.countdownBar" class="progress-striped active" value="busm.countdown.percentLeft">{{busm.countdown.timeLeft}} s</uib-progressbar></div><div class="modal-footer"><button type="button" class="btn btn-default" ng-click="busm.logout()">{{busm.options.logoutButton}}</button><button type="submit" class="btn btn-primary" ng-click="busm.stayLoggedIn()">{{busm.options.keepAliveButton}}</button></div></div>',
+        template: '<div class="modal-content"><div class="modal-header"><h4>{{busm.options.title}}</h4></div><div class="modal-body"><p>{{busm.options.message}}</p><p ng-if="busm.options.countdownMessage"> {{busm.buildCountdownMessage(busm.countdown.timeLeft + 1)}}</p><uib-progressbar ng-if="busm.options.countdownBar" class="progress-striped active" value="busm.countdown.percentLeft">{{busm.countdown.secText}}</uib-progressbar></div><div class="modal-footer"><button type="button" class="btn btn-default" ng-click="busm.logout()">{{busm.options.logoutButton}}</button><button type="submit" class="btn btn-primary" ng-click="busm.stayLoggedIn()">{{busm.options.keepAliveButton}}</button></div></div>',
         controller: 'BootstrapSessionTimeoutModalController',
         controllerAs: 'busm',
         resolve: {
@@ -77,23 +77,20 @@
           countdown: countdown
         }
       });
-
       modalInstance && modalInstance.result.then(successCb, failureCb);
-
+      
       function successCb(result) {
         if(result) {
           startSessionTimer();
         }
       }
 
-      function failureCb(result) {
-        //console.log(result);
-      }
+      function failureCb(result) { }
     }
 
     function closeModal() {
 
-      modalInstance && modalInstance.close(undefined);
+      modalInstance && modalInstance.close();
 
       $timeout(function () {
         modalInstance = null;
@@ -207,8 +204,7 @@
 
       if (type === 'dialog' && reset) {
         // If triggered by startDialogTimer start warning countdown
-        var timeLeft = Math.floor((opt.redirAfter - opt.warnAfter) / 1000);
-        countdown.timeLeft = timeLeft < 0 ? 0 : timeLeft;
+        countdown.timeLeft = Math.floor((opt.redirAfter - opt.warnAfter) / 1000);
       } else if (type === 'session' && reset) {
         // If triggered by startSessionTimer start full countdown
         // (this is needed if user doesn't close the warning dialog)
@@ -221,7 +217,6 @@
         countdown.percentLeft = Math.floor(countdown.timeLeft / (opt.redirAfter / 1000) * 100);
       }
       // Set countdown message time value
-      var countdownEl = $('.countdown-holder');
       var secondsLeft = countdown.timeLeft >= 0 ? countdown.timeLeft : 0;
       if (opt.countdownSmart) {
         var minLeft = Math.floor(secondsLeft / 60);
@@ -231,13 +226,13 @@
           countTxt += ' ';
         }
         countTxt += secRemain + 's';
-        countdownEl.text(countTxt);
+        countdown.secText = countTxt;
       } else {
-        countdownEl.text(secondsLeft + "s");
+        countdown.secText = secondsLeft + "s";
       }
 
       // Countdown by one second
-      countdown.timeLeft = countdown.timeLeft - 1;
+      countdown.timeLeft = countdown.timeLeft <= 0 ? 0 : (countdown.timeLeft - 1);
       countdown.timer = $timeout(function () {
         // Call self after one second
         startCountdownTimer(type);
@@ -267,7 +262,7 @@
 
 
     function buildCountdownMessage(time) {
-      return vm.options.countdownMessage.replace('{timer}', vm.countdown.timeLeft);
+      return vm.options.countdownMessage.replace('{timer}', time);
     }
 
     function stayLoggedIn() {
