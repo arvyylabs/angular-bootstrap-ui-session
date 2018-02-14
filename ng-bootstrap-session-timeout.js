@@ -69,7 +69,7 @@
 
       modalInstance = $uibModal.open({
         animation: true,
-        template: '<div class="modal-content"><div class="modal-header"><h4>{{busm.options.title}}</h4></div><div class="modal-body"><p>{{busm.options.message}}</p><p ng-if="busm.options.countdownMessage"> {{busm.buildCountdownMessage(busm.countdown.timeLeft + 1)}}</p><uib-progressbar ng-if="busm.options.countdownBar" class="progress-striped active" value="busm.countdown.percentLeft">{{busm.countdown.secText}}</uib-progressbar></div><div class="modal-footer"><button type="button" class="btn btn-default" ng-click="busm.logout()">{{busm.options.logoutButton}}</button><button type="submit" class="btn btn-primary" ng-click="busm.stayLoggedIn()">{{busm.options.keepAliveButton}}</button></div></div>',
+        template: '<div class="modal-content"><div class="modal-header"><h4>{{busm.options.title}}</h4></div><div class="modal-body"><p>{{busm.options.message}}</p><p ng-if="busm.options.countdownMessage"> {{busm.buildCountdownMessage(busm.countdown.timeLeft + 1)}}</p><uib-progressbar ng-if="busm.options.countdownBar" class="progress-striped active" style="min-width:15px;" value="busm.countdown.percentLeft">{{busm.countdown.secText}}</uib-progressbar></div><div class="modal-footer"><button type="button" class="btn btn-default" ng-click="busm.logout()">{{busm.options.logoutButton}}</button><button type="submit" class="btn btn-primary" ng-click="busm.stayLoggedIn()">{{busm.options.keepAliveButton}}</button></div></div>',
         controller: 'BootstrapSessionTimeoutModalController',
         controllerAs: 'busm',
         resolve: {
@@ -210,6 +210,7 @@
         // (this is needed if user doesn't close the warning dialog)
         countdown.timeLeft = Math.floor(opt.redirAfter / 1000);
       }
+      var percentLeft = 0;
       // If opt.countdownBar is true, calculate remaining time percentage
       if (opt.countdownBar && type === 'dialog') {
         countdown.percentLeft = Math.floor(countdown.timeLeft / ((opt.redirAfter - opt.warnAfter) / 1000) * 100);
