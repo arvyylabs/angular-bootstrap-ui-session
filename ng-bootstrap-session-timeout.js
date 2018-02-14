@@ -69,12 +69,15 @@
 
       modalInstance = $uibModal.open({
         animation: true,
-        template: '<div class="modal-content"><div class="modal-header"><h4>{{busm.options.title}}</h4></div><div class="modal-body"><p>{{busm.options.message}}</p><p ng-if="busm.options.countdownMessage"> {{busm.buildCountdownMessage(busm.countdown.timeLeft + 1)}}</p><uib-progressbar ng-if="busm.options.countdownBar" class="progress-striped active" style="min-width:15px;" value="busm.countdown.percentLeft">{{busm.countdown.secText}}</uib-progressbar></div><div class="modal-footer"><button type="button" class="btn btn-default" ng-click="busm.logout()">{{busm.options.logoutButton}}</button><button type="submit" class="btn btn-primary" ng-click="busm.stayLoggedIn()">{{busm.options.keepAliveButton}}</button></div></div>',
+        template: '<div class="modal-content"><div class="modal-header"><h4>{{busm.options.title}}</h4></div><div class="modal-body"><p>{{busm.options.message}}</p><p ng-if="busm.options.countdownMessage"> {{busm.buildCountdownMessage(busm.countdown.timeLeft)}}</p><uib-progressbar ng-if="busm.options.countdownBar" class="progress-striped active" style="min-width:15px; width: 100%;" value="busm.countdown.percentLeft">{{busm.countdown.secText}}</uib-progressbar></div><div class="modal-footer"><button type="button" class="btn btn-default" ng-click="busm.logout()">{{busm.options.logoutButton}}</button><button type="submit" class="btn btn-primary" ng-click="busm.stayLoggedIn()">{{busm.options.keepAliveButton}}</button></div></div>',
         controller: 'BootstrapSessionTimeoutModalController',
         controllerAs: 'busm',
         resolve: {
           options: opt,
-          countdown: countdown
+          countdown: countdown,
+          redirectOptions: {
+            redirect: redirect
+          }
         }
       });
       modalInstance && modalInstance.result.then(successCb, failureCb);
@@ -95,6 +98,14 @@
       $timeout(function () {
         modalInstance = null;
       });
+    }
+
+    function redirect() {
+      if (typeof opt.redirUrl === 'function') {
+        window.location = opt.redirUrl();
+      } else {
+        window.location = opt.redirUrl;
+      }
     }
 
     if (opt.warnAfter >= opt.redirAfter) {
@@ -132,10 +143,18 @@
     function keepAlive() {
 
       if (!keepAlivePinged) {
+        
+        var keepAliveUrl = undefined;
+        if (typeof opt.keepAliveUrl === 'function') {
+          keepAliveUrl = opt.keepAliveUrl();
+        } else {
+          keepAliveUrl = opt.keepAliveUrl;
+        }
+        
         // Ping keepalive URL using (if provided) data and type from options
         $http({
           method: opt.ajaxType,
-          url: opt.keepAliveUrl,
+          url: keepAliveUrl,
           data: opt.ajaxData
         });
         keepAlivePinged = true;
@@ -189,7 +208,7 @@
       timer = $timeout(function () {
         // Check for onRedir callback function and if there is none, launch redirect
         if (typeof opt.onRedir !== 'function') {
-          window.location = opt.redirUrl;
+          redirect()
         } else {
           opt.onRedir(opt);
         }
@@ -249,9 +268,10 @@
 
   }
 
-  BootstrapSessionTimeoutModalController.$inject = ['$uibModalInstance', 'options', 'countdown'];
-  function BootstrapSessionTimeoutModalController($uibModalInstance, options, countdown) {
+  BootstrapSessionTimeoutModalController.$inject = ['$uibModalInstance', 'options', 'countdown', 'redirectOptions'];
+  function BootstrapSessionTimeoutModalController($uibModalInstance, options, countdown, redirectOptions) {
     var vm = this;
+    var firstZero = false;
     vm.options = options;
     vm.countdown = countdown;
 
@@ -262,8 +282,17 @@
     ////////////////
 
 
-    function buildCountdownMessage(time) {
-      return vm.options.countdownMessage.replace('{timer}', time);
+    function buildCountdownMessage(time) { 
+      var displayTime = 0;
+      if(time === 0) {
+        if(!firstZero) {
+          displayTime = time + 1;
+        }
+        firstZero = true;
+      } else {
+        displayTime = time + 1;
+      }
+      return vm.options.countdownMessage.replace('{timer}', displayTime);
     }
 
     function stayLoggedIn() {
@@ -271,7 +300,7 @@
     }
 
     function logout() {
-      window.location = vm.options.redirUrl;
+      redirectOptions.redirect();
     }
   }
 
